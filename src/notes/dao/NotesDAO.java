@@ -19,8 +19,11 @@ public class NotesDAO {
 		Connection connection = null;
 		try {
 			// create a database connection
-			connection = DriverManager.getConnection("jdbc:sqlite:notes.db");
+			connection = DriverManager.getConnection("jdbc:sqlite:noteDB.db");
 			connection.createStatement().execute("PRAGMA foreign_keys = ON");
+			connection.createStatement().execute("PRAGMA encoding = \"UTF-8\"");
+
+
 		} catch (SQLException e) {
 			// if the error message is "out of memory",
 			// it probably means no database file is found
@@ -60,11 +63,13 @@ public class NotesDAO {
 	public boolean insertUser(User usr) {
 		String name = usr.getName();
 		String passhash = usr.getPasshash();
-		System.out.println("trying to insert user into db: "+name + passhash);
 		return runQuery("INSERT INTO User (Name,Passhash) VALUES('" + name + "','" + passhash + "');");
 	}
 
-	public boolean insertNote(String owner, String title, String content) {
+	public boolean insertNote(Note note) {
+		String owner = note.getOwner();
+		String title = note.getTitle();
+		String content = note.getBody();
 
 		return runQuery(
 				"INSERT INTO Note (Owner,Title,Content) VALUES('" + owner + "','" + title + "','" + content + "');");
@@ -168,6 +173,34 @@ public class NotesDAO {
 		}
 		return noteReturn;
 	}
+	public Note[] getNotesByOwner(String owner) {
+		List<Note> notes = new ArrayList<Note>();
+		
+		Connection connection = null;
+		ResultSet rs = null;
+		String query = "SELECT ID,Owner,Title,Content FROM Note WHERE Owner = '" + owner + "';";
+
+		try {
+			connection = createConnection();
+			Statement statement = connection.createStatement();
+			rs = statement.executeQuery(query);
+			while (rs.next()) {
+				Note note = new Note();
+
+				note.setId(rs.getInt("ID"));
+				note.setOwner(rs.getString("Owner"));
+				note.setTitle(rs.getString("Title"));
+				note.setBody(rs.getString("Content"));
+				notes.add(note);
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+
+		return notes.toArray(new Note[notes.size()]);
+
+	}
 
 	public Note[] getAllNotes() {
 		List<Note> notes = new ArrayList<Note>();
@@ -180,11 +213,7 @@ public class NotesDAO {
 				break;
 			}
 			notes.add(note);
-			System.out.print(note.getId() + ":");
-			System.out.print(" Owner: " + note.getOwner());
-			System.out.print(" Title: " + note.getTitle());
-			System.out.print(" Content: " + note.getBody());
-			System.out.println();
+
 			counter++;
 		}
 
@@ -247,10 +276,10 @@ public class NotesDAO {
 			closeConnection(connection);
 		}
 		User[] result = new User[userReturn.size()];
-		return  userReturn.toArray(result);
+		return userReturn.toArray(result);
 	}
-	
- 	public User[] getUsersThatAccessNote(int id) {
+
+	public User[] getUsersThatAccessNote(int id) {
 		// gets all users that have access to a note and the notes owner and returns
 		// them in a array where [0] is the owner and the rest go after
 		List<User> users = new ArrayList<User>();
@@ -318,6 +347,8 @@ public class NotesDAO {
 	public void createDB() {
 		Connection connection = null;
 		try {
+			System.out.println("trying to create db");
+
 			connection = createConnection();
 			Statement statement = connection.createStatement();
 			statement.executeUpdate("CREATE TABLE User (\r\n" + "    Name     VARCHAR PRIMARY KEY\r\n"
@@ -339,6 +370,8 @@ public class NotesDAO {
 					+ "    ID   INTEGER REFERENCES Note (ID) ON DELETE CASCADE\r\n"
 					+ "                                      ON UPDATE CASCADE\r\n" + ");\r\n" + ""); // Create table
 			// Users_Access_Notes
+			System.out.println("created db");
+
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -352,18 +385,17 @@ public class NotesDAO {
 	public void deleteDB() {
 		Connection connection = null;
 		try {
+			System.out.println("trying to delete db");
 			connection = createConnection();
 			Statement statement = connection.createStatement();
 			statement.executeUpdate("DROP TABLE User;");
 			statement.executeUpdate("DROP TABLE Notes;");
 			statement.executeUpdate("DROP TABLE Users_Access_Notes;");
-
+			System.out.println("deleted db");
 
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -384,9 +416,9 @@ public class NotesDAO {
 			e1.printStackTrace();
 		}
 		try {
-			statement.executeQuery("select * from User"); // this is a temporary check, it only checks
-															// the validity of the USER table and
-															// assumes the rest is valid
+			statement.executeQuery("select * from User");
+			statement.executeQuery("select * from Note");
+			statement.executeQuery("select * from Users_Access_Notes");
 			return true;
 		} catch (SQLException e) {
 			return false;

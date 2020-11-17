@@ -10,23 +10,24 @@ import notes.dao.*;
 import notes.model.*;
 
 public class NotesController {
+	NotesDAO dao;
+
+	public NotesController(){
+		dao = new NotesDAO();
+	}
 
 	public boolean login(String[] log) {
 		User inUsr = new User(log[0], hashString(log[1]));
 
-
-		return inUsr.compare(new NotesDAO().getUser(inUsr.getName()));
+		return inUsr.compare(dao.getUser(inUsr.getName()));
 	}
 
 	public boolean register(String[] reg) {
 		User inUsr = new User(reg[0], hashString(reg[1]));
-		NotesDAO dao = new NotesDAO();
-
 		return dao.insertUser(inUsr);
 	}
 
 	public String[] userList() {
-		NotesDAO dao = new NotesDAO();
 		User[] dbList = dao.getAllUsers();
 		List<String> list = new ArrayList<String>();
 		for (int i = 0; i < dbList.length; i++) {
@@ -38,67 +39,106 @@ public class NotesController {
 
 		return result;
 	}
+	
+	public Note[] getUserNotes(String owner) {
 
+		return dao.getNotesByOwner(owner);
+		
+	}
+
+	
 	public void createDB() {
-		NotesDAO dao = new NotesDAO();
-		dao.createDB();
-		loadPrebuiltDB();
+		if (!dao.checkDB()) {
+			dao.createDB();
+			loadPrebuiltDB();
+		}
 
 	}
 
 	public void deleteDB() {
-		NotesDAO dao = new NotesDAO();
 		dao.deleteDB();
+	}
+
+	public void createNote(Note note) {
+		if (note.getTitle().length() >= 40) {
+			System.out.println("too long of a title");
+		} else {
+			dao.insertNote(note);
+		}
 	}
 
 	public void loadPrebuiltDB() {
 
-		NotesDAO dao = new NotesDAO();
 		// preset users
 		User usr = new User();
 		usr = new User("root", hashString("root"));
 		dao.insertUser(usr);
-		
+
 		usr = new User("admin", hashString("1234"));
 		dao.insertUser(usr);
-		
+
 		usr = new User("Pepe", hashString("moroso"));
 		dao.insertUser(usr);
-		
+
 		usr = new User("user", hashString("password"));
 		dao.insertUser(usr);
-		
+
 		usr = new User("Juan", hashString("1234"));
 		dao.insertUser(usr);
-		
+
 		usr = new User("Pere", hashString("1234"));
 		dao.insertUser(usr);
-		
+
 		usr = new User("Manu", hashString("1234"));
 		dao.insertUser(usr);
-		
-		usr =new User("Jesucristo", hashString("Superstart"));
+
+		usr = new User("Jesucristo", hashString("Superstar"));
 		dao.insertUser(usr);
-		
-		usr =new User("SCP", hashString("096"));
+
+		usr = new User("SCP", hashString("096"));
 		dao.insertUser(usr);
-		
-		usr =new User("La botella", hashString("de agua"));
+
+		usr = new User("La botella", hashString("de agua"));
 		dao.insertUser(usr);
 
 		// preset notes
-		dao.insertNote("root", "TestNote1", "<p>note1content</p>");
-		dao.insertNote("root", "TestNote2", "<h1>note1content</h1>");
-		dao.insertNote("root", "TestNote3", "<h3>note1content</h3>");
-		dao.insertNote("admin", "I am a god", "Fear me");
-		dao.insertNote("user", "A note for everyone", "But no for you");
-		dao.insertNote("Pere", "for root", "pere");
-		dao.insertNote("Juan", "for root", "juan");
-		dao.insertNote("Manu", "for root", "manu");
-		dao.insertNote("SCP", "for Pere", " only Pere");
-		dao.insertNote("SCP", "for Juan", "only Juan");
-		dao.insertNote("SCP", "for Manu", "only Manu");
-		dao.insertNote("SCP", "for root", "");
+		Note note = new Note();
+
+		note = new Note("root", "TestNote1", "<p>note1content</p>");
+		dao.insertNote(note);
+
+		note = new Note("root", "TestNote2", "<h1>note1content</h1>");
+		dao.insertNote(note);
+
+		note = new Note("root", "TestNote3", "<h3>note1content</h3>");
+		dao.insertNote(note);
+
+		note = new Note("admin", "I am a god", "Fear me");
+		dao.insertNote(note);
+
+		note = new Note("user", "A note for everyone", "But no for you");
+		dao.insertNote(note);
+
+		note = new Note("Pere", "for root", "pere");
+		dao.insertNote(note);
+
+		note = new Note("Juan", "for root", "juan");
+		dao.insertNote(note);
+
+		note = new Note("Manu", "for root", "manu");
+		dao.insertNote(note);
+
+		note = new Note("SCP", "for Pere", " only Pere");
+		dao.insertNote(note);
+
+		note = new Note("SCP", "for Juan", "only Juan");
+		dao.insertNote(note);
+
+		note = new Note("SCP", "for Manu", "only Manu");
+		dao.insertNote(note);
+
+		note = new Note("SCP", "for root", "");
+		dao.insertNote(note);
 
 		// preset access
 		dao.insertUsers_Access_Notes("admin", 5);

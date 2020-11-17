@@ -2,12 +2,15 @@ package notes.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 
 import notes.controller.*;
-import notes.model.User;
+import notes.model.*;
 
 @WebServlet("/NotesServlet")
 public class NotesServlet extends HttpServlet {
@@ -28,7 +31,9 @@ public class NotesServlet extends HttpServlet {
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response) {
 		NotesController controller = new NotesController();
 		Map<String, Object> map = new HashMap<String, Object>();
-
+		String name = readCookie("username", request);
+		String pass = readCookie("password", request);
+		
 		switch (request.getParameter("formType")) {
 		case "register":
 			map.put("name", request.getParameter("name"));
@@ -42,13 +47,36 @@ public class NotesServlet extends HttpServlet {
 			}
 			break;
 		case "login":
-			map.put("name", request.getParameter("name"));
-			String[] inp = new String[] { request.getParameter("name"), request.getParameter("password") };
+			String uName = request.getParameter("name");
+			map.put("name", uName);
+			String[] inp = new String[] { uName, request.getParameter("password") };
 			if (controller.login(inp)) {
+				// store cookies only when login is valid
+				Cookie nameCookie = new Cookie("username", uName);
+				nameCookie.setMaxAge(60 * 60 * 24);
+				response.addCookie(nameCookie);
+
+				Cookie passCookie = new Cookie("password", request.getParameter("password"));
+				passCookie.setMaxAge(60 * 60 * 24);
+				response.addCookie(passCookie);
 				map.put("isOkay", true);
+
 			} else {
 				map.put("isOkay", false);
 			}
+
+			break;
+		case "logout":
+			Cookie nameCookie = new Cookie("username", "");
+			Cookie passCookie = new Cookie("password", "");
+
+			nameCookie.setMaxAge(0);
+			passCookie.setMaxAge(0);
+
+			response.addCookie(nameCookie);
+			response.addCookie(passCookie);
+			map.put("isOkay", true);
+
 			break;
 		case "createDB":
 			try {
@@ -70,6 +98,53 @@ public class NotesServlet extends HttpServlet {
 			}
 
 			break;
+		case "createNote":
+			try {
+				Note note = new Note();
+				note.setOwner(readCookie("username", request));
+				note.setTitle(request.getParameter("title"));
+				note.setBody(request.getParameter("content"));
+
+				controller.createNote(note);
+
+				map.put("isOkay", true);
+
+			} catch (Exception e) {
+				map.put("isOkay", false);
+
+			}
+
+			break;
+		case "getOwnerNotes":
+			try {
+				map.put("notes", controller.getUserNotes(name));
+				map.put("isOkay", true);
+			} catch (Exception e) {
+				map.put("isOkay", false);
+			}
+			break;
+		case "startUp":
+
+			System.out.println("cookie name:" + name + " cookie pass:" + pass);
+			System.out.println("trying to log in");
+			if (name == null || pass == null) {
+				map.put("isOkay", false);
+				System.out.println("couldn't log in");
+			} else {
+				if (controller.login(new String[] { name, pass })) {
+					map.put("name", name);
+
+					map.put("isOkay", true);
+					System.out.println("logged in");
+
+				} else {
+					map.put("isOkay", false);
+					System.out.println("couldn't log in");
+
+				}
+			}
+
+			break;
 		}
 
 		try {
@@ -79,6 +154,21 @@ public class NotesServlet extends HttpServlet {
 		}
 
 		request.getParameter("formType");
+	}
+
+	public String readCookie(String key, HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+		for (int i = 0; i < cookies.length; i++) {
+
+			Cookie cookie = cookies[i];
+
+			if (key.equals(cookie.getName())) {
+
+				return (cookie.getValue());
+			}
+
+		}
+		return null;
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
