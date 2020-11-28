@@ -134,7 +134,7 @@ public class NotesController {
         usr = new User("admin", hashString("1234"));
         dao.insertUser(usr);
 
-        usr = new User("Pepe", hashString("moroso"));
+        usr = new User("Pepe", hashString("theman"));
         dao.insertUser(usr);
 
         usr = new User("user", hashString("password"));
