@@ -1,8 +1,8 @@
 # Preconstructed database
 Here you can see some of the elements the preconstructed database created using the createDB function has, these can be freely altered or simply removed with no repercussions to the functionality to the app. Please note** these are not all the elements** included in the default db.
 ## Users
-| ID  |  Username |  Password |
-| ------------ | ------------ | ------------ | ------------ |
+| ID | Username | Password |
+| ------------ | ------------ | ------------ |
 |  1 |  root |  root |
 |  2 |  admin |  1234 |
 |  3  |  Pepe | theman  |
@@ -11,9 +11,9 @@ Here you can see some of the elements the preconstructed database created using 
 | 6 | Pere  | 1234  |
 | 7  |  Manu |  1234 |
 
-##Notes
+## Notes
 | ID  |  Owner |  Title | Content |
-| ------------ | ------------ | ------------ | ------------ |------------ |
+| ------------ | ------------ | ------------ | ------------ |
 | 1 | root | TestNote1 | Note 1 content |
 | 2 | root | TestNote1 | Note 2 content |
 | 3 | root | TestNote3 | Note 3 content |
@@ -23,7 +23,7 @@ Here you can see some of the elements the preconstructed database created using 
 |  7 |  Juan | for root  | juan  |
 | 8  | Manu  |  for root | manu  |
 
-##Shared notes
+## Shared notes
 |  Note ID | Shared User  |
 | ------------ | ------------ |
 |  5 |admin   |
