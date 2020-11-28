@@ -46,6 +46,14 @@
           <warSourceDirectory>WebContent</warSourceDirectory>
         </configuration>
       </plugin>
+        <plugin>
+            <artifactId>tomcat7-maven-plugin</artifactId>
+            <version>2.2</version>
+            <groupId>org.apache.tomcat.maven</groupId>
+            <configuration>
+                <path>/</path>
+            </configuration>
+        </plugin>
     </plugins>
   </build>
 </project>

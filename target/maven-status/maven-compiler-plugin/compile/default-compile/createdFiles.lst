@@ -1,0 +1,5 @@
+notes\model\User.class
+notes\controller\NotesController.class
+notes\servlet\NotesServlet.class
+notes\dao\NotesDAO.class
+notes\model\Note.class

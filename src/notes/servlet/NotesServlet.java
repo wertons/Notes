@@ -22,170 +22,242 @@ import notes.model.*;
 
 @WebServlet("/NotesServlet")
 public class NotesServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public NotesServlet() {
-		super();
-	}
+    public NotesServlet() {
+        super();
+    }
 
-	protected void processRequest(HttpServletRequest request, HttpServletResponse response) {
-		NotesController controller = new NotesController();
-		Map<String, Object> map = new HashMap<String, Object>();
-		String name = readCookie("username", request);
-		String pass = readCookie("password", request);
-		
-		switch (request.getParameter("formType")) {
-		case "register":
-			map.put("name", request.getParameter("name"));
-			if (request.getParameter("password").equals(request.getParameter("passwordCheck"))) {
-				String[] inp = new String[] { request.getParameter("name"), request.getParameter("password") };
-				if (controller.register(inp)) {
-					map.put("isOkay", true);
-				} else {
-					map.put("isOkay", false);
-				}
-			}
-			break;
-		case "login":
-			String uName = request.getParameter("name");
-			map.put("name", uName);
-			String[] inp = new String[] { uName, request.getParameter("password") };
-			if (controller.login(inp)) {
-				// store cookies only when login is valid
-				Cookie nameCookie = new Cookie("username", uName);
-				nameCookie.setMaxAge(60 * 60 * 24);
-				response.addCookie(nameCookie);
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) {
+        NotesController controller = new NotesController();
+        Map<String, Object> map = new HashMap<String, Object>();
+        String name = readCookie("username", request);
+        String pass = readCookie("password", request);
 
-				Cookie passCookie = new Cookie("password", request.getParameter("password"));
-				passCookie.setMaxAge(60 * 60 * 24);
-				response.addCookie(passCookie);
-				map.put("isOkay", true);
+        switch (request.getParameter("formType")) {
+            case "register":
+                map.put("name", request.getParameter("name"));
+                if (request.getParameter("password").equals(request.getParameter("passwordCheck"))) {
+                    String[] inp = new String[]{request.getParameter("name"), request.getParameter("password")};
+                    if (controller.register(inp)) {
+                        map.put("isOkay", true);
+                    } else {
+                        map.put("isOkay", false);
+                    }
+                }
+                break;
+            case "login":
+                String uName = request.getParameter("name");
+                map.put("name", uName);
+                String[] inp = new String[]{uName, request.getParameter("password")};
+                if (controller.login(inp)) {
+                    // store cookies only when login is valid
+                    Cookie nameCookie = new Cookie("username", uName);
+                    nameCookie.setMaxAge(60 * 60 * 24);
+                    response.addCookie(nameCookie);
 
-			} else {
-				map.put("isOkay", false);
-			}
+                    Cookie passCookie = new Cookie("password", request.getParameter("password"));
+                    passCookie.setMaxAge(60 * 60 * 24);
+                    response.addCookie(passCookie);
+                    map.put("isOkay", true);
 
-			break;
-		case "logout":
-			Cookie nameCookie = new Cookie("username", "");
-			Cookie passCookie = new Cookie("password", "");
+                } else {
+                    map.put("isOkay", false);
+                }
 
-			nameCookie.setMaxAge(0);
-			passCookie.setMaxAge(0);
+                break;
+            case "logout":
+                Cookie nameCookie = new Cookie("username", "");
+                Cookie passCookie = new Cookie("password", "");
 
-			response.addCookie(nameCookie);
-			response.addCookie(passCookie);
-			map.put("isOkay", true);
+                nameCookie.setMaxAge(0);
+                passCookie.setMaxAge(0);
 
-			break;
-		case "createDB":
-			try {
-				controller.createDB();
+                response.addCookie(nameCookie);
+                response.addCookie(passCookie);
 
-				map.put("isOkay", true);
-			} catch (Exception e) {
-				map.put("isOkay", false);
-			}
+                map.put("isOkay", true);
 
-			break;
-		case "deleteDB":
-			try {
-				controller.deleteDB();
+                break;
+            case "createDB":
+                try {
+                    controller.createDB();
 
-				map.put("isOkay", true);
-			} catch (Exception e) {
-				map.put("isOkay", false);
-			}
+                    map.put("isOkay", true);
+                } catch (Exception e) {
+                    map.put("isOkay", false);
+                }
 
-			break;
-		case "createNote":
-			try {
-				Note note = new Note();
-				note.setOwner(readCookie("username", request));
-				note.setTitle(request.getParameter("title"));
-				note.setBody(request.getParameter("content"));
+                break;
+            case "deleteDB":
+                try {
+                    controller.deleteDB();
 
-				controller.createNote(note);
+                    map.put("isOkay", true);
+                } catch (Exception e) {
+                    map.put("isOkay", false);
+                }
 
-				map.put("isOkay", true);
+                break;
+            case "createNote":
+                try {
+                    Note note = new Note();
+                    note.setOwner(readCookie("username", request));
+                    note.setTitle(request.getParameter("title"));
+                    note.setBody(request.getParameter("content"));
 
-			} catch (Exception e) {
-				map.put("isOkay", false);
+                    controller.createNote(note);
 
-			}
+                    map.put("isOkay", true);
 
-			break;
-		case "getOwnerNotes":
-			try {
-				map.put("notes", controller.getUserNotes(name));
-				map.put("isOkay", true);
-			} catch (Exception e) {
-				map.put("isOkay", false);
-			}
-			break;
-		case "startUp":
+                } catch (Exception e) {
+                    map.put("isOkay", false);
 
-			System.out.println("cookie name:" + name + " cookie pass:" + pass);
-			System.out.println("trying to log in");
-			if (name == null || pass == null) {
-				map.put("isOkay", false);
-				System.out.println("couldn't log in");
-			} else {
-				if (controller.login(new String[] { name, pass })) {
-					map.put("name", name);
+                }
 
-					map.put("isOkay", true);
-					System.out.println("logged in");
+                break;
+            case "deleteNote":
+                try {
+                    controller.deleteNote(request.getParameter("id"));
+                    map.put("isOkay", true);
+                } catch (Exception e) {
+                    map.put("isOkay", false);
 
-				} else {
-					map.put("isOkay", false);
-					System.out.println("couldn't log in");
+                }
+                break;
+            case "getOwnerNotes":
+                try {
+                    map.put("notes", controller.getUserNotes(name));
+                    map.put("isOkay", true);
+                } catch (Exception e) {
+                    map.put("isOkay", false);
+                }
+                break;
+            case "getAcNotes":
+                try {
+                    map.put("notes", controller.getNotesThatUserAccess(name));
+                    map.put("isOkay", true);
+                } catch (Exception e) {
+                    map.put("isOkay", false);
+                }
+                break;
+            case "grantAc":
+                try {
+                    controller.createAccessToNote(name, request.getParameter("user"), request.getParameter("id"));
+                    map.put("isOkay", true);
+                } catch (Exception e) {
+                    map.put("isOkay", false);
+                }
+                break;
+            case "getUserAc":
+                try {
+                    User[] users = controller.getUsersThatAccessNote(request.getParameter("id"));
+                    String[] userArr = new String[users.length];
+                    for (int i = 0; i < users.length; i++) {
+                        userArr[i] = users[i].getName();
+                    }
+                    map.put("users", userArr);
+                    map.put("isOkay", true);
+                } catch (Exception e) {
+                    map.put("isOkay", false);
+                }
+                break;
+            case "deleteAc":
+                try {
+                    String user = "";
+                    if (request.getParameter("user").equals("")) {
+                        user = name;
+                    } else {
+                        user = request.getParameter("user");
+                    }
+                    controller.deleteAccessToNote(name, user, request.getParameter("id"));
+                    map.put("isOkay", true);
+                } catch (Exception e) {
+                    map.put("isOkay", false);
+                }
+                break;
+            case "startUp":
 
-				}
-			}
+                System.out.println("cookie name:" + name + " cookie pass:" + pass);
+                System.out.println("trying to log in");
+                if (name == null || pass == null) {
+                    map.put("isOkay", false);
+                    System.out.println("couldn't log in");
+                } else {
+                    if (controller.login(new String[]{name, pass})) {
+                        map.put("name", name);
 
-			break;
-		}
+                        map.put("isOkay", true);
+                        System.out.println("logged in");
 
-		try {
-			write(response, map);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+                    } else {
+                        map.put("isOkay", false);
+                        System.out.println("couldn't log in");
 
-		request.getParameter("formType");
-	}
+                    }
+                }
 
-	public String readCookie(String key, HttpServletRequest request) {
-		Cookie[] cookies = request.getCookies();
-		for (int i = 0; i < cookies.length; i++) {
+                break;
+            case "updateNoteForm":
+                Note noteUpdate = new Note();
 
-			Cookie cookie = cookies[i];
+                noteUpdate.setId(Integer.parseInt(request.getParameter("id")));
+                noteUpdate.setOwner(name);
+                noteUpdate.setTitle(request.getParameter("title"));
+                noteUpdate.setBody((request.getParameter("content")));
 
-			if (key.equals(cookie.getName())) {
+                try {
+                    controller.updateNote(noteUpdate);
 
-				return (cookie.getValue());
-			}
+                    map.put("isOkay", true);
 
-		}
-		return null;
-	}
+                } catch (Exception e) {
+                    map.put("isOkay", false);
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+                }
 
-	}
+                break;
+        }
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		processRequest(request, response);
+        try {
+            write(response, map);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-	}
+        request.getParameter("formType");
+    }
 
-	private void write(HttpServletResponse response, Map<String, Object> map) throws IOException {
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getWriter().write(new Gson().toJson(map));
-	}
+    public String readCookie(String key, HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        for (int i = 0; i < cookies.length; i++) {
+
+            Cookie cookie = cookies[i];
+
+            if (key.equals(cookie.getName())) {
+
+                return (cookie.getValue());
+            }
+
+        }
+        return null;
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+
+    }
+
+    private void write(HttpServletResponse response, Map<String, Object> map) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(new Gson().toJson(map));
+    }
 
 }
