@@ -2,8 +2,11 @@
  A barebones "*notebook*" web app built on JSP, JS and CSS for interfaces, JAVA for managing backend and SQLITE as server.
  
  This project was built using the  Eclipse IDE and its tools, and meant as a **learning project** it is** by no means **a functional or client-ready app, but by all means do feel free to check out and use the code.
+ 
+ The app is at its core a CRUD system with a user system to manage it. It has 2 core entities:
+ - **Users:** 
 
-## User manual
+## How to use
 This is the main screen of the app, it will load up when no user is loaded in the cache, the functionalities are pretty self explanatory, but **be careful there are no confirmations**,  so **if you click on Delete DB it will delete it no questions asked**.
 After registering a user or using one of the [default ones](https://github.com/wertons/Notes/blob/main/github/resources/preloaded_database.md "default ones") you can log in with the users credentials.
 ![Main screen](https://raw.githubusercontent.com/wertons/Notes/main/github/resources/login_screen.bmp "The first screen you will se")
@@ -48,9 +51,9 @@ This web app uses **Java** to manage server-side operations. The code is separat
 The Java files manage the main functionalities of the app. Here is a list of the functions of each class as well as their specific functions and their purposes.
 ### NotesServlet
 A simple **Java web servlet**, it manages the petitions received from the JSP page by reading the request and calling the controller based on its content. It also manages the pages **cookies**.
-###NotesModel
+### NotesModel
 There are two models, one for each table in the database, User which defines and stores the pages users information, and notes which store the notes and their information.
-###NotesDAO
+### NotesDAO
 The DAO manages the data from and into the database, it does so with the following set of functions:
 ##### Logic functions
 - **createConnection()**: Creates and returns a JDBC connection to the database, this function is called by all other functions in order to interact with the db.
