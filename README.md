@@ -45,5 +45,35 @@ This web app uses **Java** to manage server-side operations. The code is separat
 - **Model**: Which stores the custom classes we created for the app.
 - **DAO**: Which manages interactions with the SQLITE database.
 - **Controller**: Which serves as the central operation point which carries out the logic and functions.
-The Java files manage the main functionalities of the app
-
+The Java files manage the main functionalities of the app. Here is a list of the functions of each class as well as their specific functions and their purposes.
+### NotesServlet
+A simple **Java web servlet**, it manages the petitions received from the JSP page by reading the request and calling the controller based on its content. It also manages the pages **cookies**.
+###NotesModel
+There are two models, one for each table in the database, User which defines and stores the pages users information, and notes which store the notes and their information.
+###NotesDAO
+The DAO manages the data from and into the database, it does so with the following set of functions:
+##### Logic functions
+- **createConnection()**: Creates and returns a JDBC connection to the database, this function is called by all other functions in order to interact with the db.
+- **closeConnection()**: Closes a database connection, this function is always called at the end of a transaction with the database.
+- **runQuery(query)**: Executes a query with no response into the database.
+##### Database functions
+- **createDB()**: Creates the database tables.
+- **deleteDB()**: Deletes the database tables and their contents.
+- **checkDB()**: Checks that the database is correctly created.
+##### User functions
+- **insertUser(user)**: Create a query in order to insert a user into the database using the runQuery function.
+- **getUser(name)**: Searches the database for a user by name and returns it.
+- **getUsersThatAccessNote(id)**: Gets all the users that have acces to a certain note.
+- **checkUser(name)**: Checks if there is a user with the name in the database.
+- **checkLogin(user,passhash)**: Searches the database for a exact match of the login information in order to log in a user.
+##### Note functions
+- **insertNote(note)**: Create a query in order to insert a note into the database using the runQuery function.
+- **insertUsers_Access_Notes(user,id)**: Grants access to a certain note to a certain user
+- **getNote(id)**: Searches the database for a note by id and returns it.
+- **getAllNotes()**: Gets all the notes from the database.
+- **getNotesThatUserAccess(user)**: Gets all the notes a certain user has access to.
+- **deleteNote(id)**: Create a query in order to delete a note from the database using the runQuery function.
+- **deleteUsers_Access_Notes(user,id)**: Removes access from a certain note to a certain user
+- **modifyNote(note)**: Create a query in order to modify a already existing note from the database using the runQuery function.
+### NotesController
+Manages the logic of the web app and the interactions between its components.
